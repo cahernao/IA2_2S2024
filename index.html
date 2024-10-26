@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PROYECTO 2</title>
     <link rel="stylesheet" href="main.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!--<script type="text/javascript" src="tytus.js"></script>-->
 </head>
 <body>
     <h1> HOLA MUNDO</h1>
-    <input type="file" id="archivo" title="Archivo CSV">
+    <input type="file" id="fileInput" title="Archivo CSV">
     <h4 for="ml">Seleccione modelo</h4>
     <select name="ml" id="ml">
         <option value="uno">Uno</option>
         <option value="dos">Dos</option>
     </select>
-    <button onclick="mensaje()"> CLICK</button>
+    <button onclick="procesarArchivo()"> Generar </button>
+
+    <pre id="output"></pre>
     <script src="script.js"></script>
+
 </body>
 </html>
