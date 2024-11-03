@@ -1,5 +1,8 @@
 let contenidoArchivo = "";
+let contenidoDos = "";
 let a = ""
+let dtSt = [];
+//let predi
 function procesarArchivo() {
     const fileInput = document.getElementById("fileInput");
     const optionSelected = document.getElementById("ml").value;
@@ -23,6 +26,9 @@ function procesarArchivo() {
                 break;
             case "dos":
                 optionTwo();
+                break;
+            case "tres":
+                optionThree();
                 break;
             default:
                 alert("Opcion no valida");
@@ -123,7 +129,7 @@ function optionTwo() {
 
     a = joinArrays('x', xTrain, 'Training', yTrain, 'Prediction Degree 2', yPredict, 'Prediction Degree 3', yPredict2, 'Prediction Degree 4', yPredict3);
 
-    console.log('el valor de a es'+a);
+    console.log('el valor de a es' + a);
 
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(drawChart2);
@@ -134,10 +140,11 @@ function optionTwo() {
 function generateOptions() {
     const content = document.getElementById("operations");
     content.innerHTML = `
-        <button onclick="entrenamiento()">Entrenamiento</button>
+    <input type="file" id="fileInputP" title="Archivo CSV">    
+    <button onclick="entrenamiento()">Entrenamiento</button>
         <button onclick="prediccion()">Prediccion</button>
-        <button onclick="prediccion()">Tendencias</button>
         <button onclick="graficos()">Graficos</button>
+        
     `;
 }
 
@@ -151,7 +158,7 @@ function drawChart() {
     };
     var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
     chart.draw(data, options);
-}    
+}
 
 
 
@@ -183,3 +190,192 @@ function drawChart2() {
 
 
 //-------------------------------------------               polinomial
+//-------------------------------------------               arbol de decision
+
+function optionThree() {
+
+    try {
+        const lines = contenidoArchivo.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        dtSt = [];
+        // Procesar cada línea
+        for (let i = 1; i < lines.length - 1; i++) {  // Comienza en 1 y termina en length - 1
+            const line = lines[i];
+            // Eliminar los corchetes externos si están presentes y separar por comas
+            const row = line.replace(/[\[\]]/g, '').split(',').map(item => item.trim().replace(/"/g, ''));
+            dtSt.push(row);
+        }
+
+        // Muestra la dtSt en la consola y en el HTML
+        console.log("dtSt leída:", dtSt);
+        //document.getElementById("output").textContent = JSON.stringify(dtSt, null, 2);
+
+    } catch (error) {
+        console.error('error al leer archivo' + error);
+    }
+}
+
+function prediccion() {
+
+    const fileInput = document.getElementById("fileInputP");
+    if (fileInput.files.length === 0) {
+        alert("Por favor, seleccione un archivo");
+        return;
+    }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    const predictm = [];
+    
+    reader.onload = function (e) {
+        try {
+            contenidoDos = e.target.result;
+            const lines = contenidoDos.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+            // Procesar cada línea, excluyendo la primera y última
+            for (let i = 1; i < lines.length - 1; i++) {  
+                const line = lines[i];
+                const row = line.replace(/[\[\]]/g, '').split(',').map(item => item.trim().replace(/"/g, ''));
+                predictm.push(row);
+            }
+
+            console.log("Archivo de predicción:", predictm);
+
+        } catch (error) {
+            console.log('Error al leer archivo:', error);
+        }
+    };
+    reader.readAsText(file);
+
+    let dTree = new DecisionTreeID3(dtSt);
+    let root = dTree.train(dTree.dataset);
+    let predict = dTree.predict(predictm, root);
+
+    const objt = {
+        dotStr: dTree.generateDotString(root),
+        predictNode: predict
+    };
+
+    document.getElementById("log").innerHTML += '<br>Arbol de decision: <br>' + objt.dotStr + '<br>';
+
+    //renderTree(objt.dotStr);  
+
+    /*const fileInput = document.getElementById("fileInputP");
+    if (fileInput.files.length === 0) {
+        alert("Por favor, seleccione un archivo");
+        return;
+    }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    const predictm = [];
+    reader.onload = function (e) {
+
+        try {
+            contenidoDos = e.target.result;
+            const lines = contenidoDos.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+            // Procesar cada línea
+            for (let i = 1; i < lines.length - 1; i++) {  // Comienza en 1 y termina en length - 1
+                const line = lines[i];
+                // Eliminar los corchetes externos si están presentes y separar por comas
+                const row = line.replace(/[\[\]]/g, '').split(',').map(item => item.trim().replace(/"/g, ''));
+                predictm.push(row);
+            }
+
+            // Muestra la dtSt en la consola y en el HTML
+            console.log("--- leída:", predictm);
+
+        } catch (error) {
+            console.log('error al leer archivo' + error);
+
+        }
+
+    }
+    reader.readAsText(file);
+
+    let dTree = new DecisionTreeID3(dtSt);
+    let root = dTree.train(dTree.dataset);
+    let predict = dTree.predict(predictm, root);
+
+    const objt = {
+        dotStr: dTree.generateDotString(root),
+        predictNode: predict
+    };
+
+    var chart = document.getElementById("chart_div");
+        var {
+            dotStr,
+            predictNode
+        } = this.testWithChart()
+        //console.log(predictNode);
+        var parsDot = vis.network.convertDot(dotStr);
+        var data = {
+            nodes: parsDot.nodes,
+            edges: parsDot.edges
+        }
+        var options = {
+            layout: {
+                hierarchical: {
+                    levelSeparation: 100,
+                    nodeSpacing: 100,
+                    parentCentralization: true,
+                    direction: 'UD', // UD, DU, LR, RL
+                    sortMethod: 'directed', // hubsize, directed
+                    //shakeTowards: 'roots' // roots, leaves                        
+                },
+            },
+        };
+        var network = new vis.Network(chart, data, options);*/
+
+
+}
+
+function renderTree(dotStr) {
+    const chart = document.getElementById("chart_div");
+    const parsedDot = vis.network.convertDot(dotStr);
+
+    const data = {
+        nodes: parsedDot.nodes,
+        edges: parsedDot.edges
+    };
+    const options = {
+        layout: {
+            hierarchical: {
+                levelSeparation: 100,
+                nodeSpacing: 100,
+                parentCentralization: true,
+                direction: 'UD',
+                sortMethod: 'directed'
+            },
+        },
+    };
+    new vis.Network(chart, data, options);
+}
+
+/**
+ * function procesarArchivo() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        contenidoArchivo = e.target.result;
+
+        switch (optionSelected) {
+            case "uno":
+                optionOne();
+                break;
+            case "dos":
+                optionTwo();
+                break;
+            case "tres":
+                optionThree();
+                break;
+            default:
+                alert("Opcion no valida");
+        }
+
+    }
+
+    reader.readAsText(file);
+}
+
+ */
