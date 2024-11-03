@@ -6,7 +6,7 @@
     <title>PROYECTO 2</title>
     <link rel="stylesheet" href="main.css">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <!--<script type="text/javascript" src="tytus.js"></script>-->
+    <script src="tytus.js"></script>
 </head>
 <body>
     <h1> CARLOS AUGUSTO HERNANDEZ ORDOÑEZ</h1>
@@ -14,13 +14,19 @@
     <input type="file" id="fileInput" title="Archivo CSV">
     <h4 for="ml">Seleccione modelo</h4>
     <select name="ml" id="ml">
-        <option value="uno">Uno</option>
+        <option value="uno">Regresion lineal</option>
         <option value="dos">Dos</option>
     </select>
     <button onclick="procesarArchivo()"> Cargar entrada </button>
 
+    
+
     <pre id="operations"></pre>
     <pre id="output"></pre>
+
+    <p id="log"></p>    
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+
     <script src="script.js"></script>
 
 </body>
