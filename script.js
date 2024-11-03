@@ -127,7 +127,7 @@ function optionTwo() {
     document.getElementById("log").innerHTML += 'R^2 for Degree 3: ' + Number(r22.toFixed(2)) + '<br>';
     document.getElementById("log").innerHTML += 'R^2 for Degree 4: ' + Number(r23.toFixed(2)) + '<br>';
 
-    a = joinArrays('x', xTrain, 'Training', yTrain, 'Prediction Degree 2', yPredict, 'Prediction Degree 3', yPredict2, 'Prediction Degree 4', yPredict3);
+    a = joinArrays2('x', xTrain, 'Training', yTrain, 'Prediction Degree 2', yPredict, 'Prediction Degree 3', yPredict2, 'Prediction Degree 4', yPredict3);
 
     console.log('el valor de a es' + a);
 
@@ -163,7 +163,7 @@ function drawChart() {
 
 
 //-------------------------------------------               polinomial
-function joinArrays() {
+function joinArrays2() {
     a = []
     if (arguments.length == 10) {
         a.push([arguments[0], arguments[2], arguments[4], arguments[6], arguments[8]]);
