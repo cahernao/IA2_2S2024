@@ -56,8 +56,6 @@ function optionOne() {
     console.log("XTrain:", XTrain);
     console.log("YTrain:", YTrain);
 
-    document.getElementById("log").innerHTML = XTrain;
-    document.getElementById("log").innerHTML += YTrain;
 
     var linear = new LinearRegression()
     linear.fit(XTrain, YTrain)
@@ -71,10 +69,66 @@ function optionOne() {
 }
 
 function optionTwo() {
-    let fragmento = contenidoArchivo.slice(0, 50);
-    document.getElementById("output").innerHTML += "<h3>Opcion dos</h3><br><b>";
-    document.getElementById("output").innerHTML += fragmento;
-    document.getElementById("output").innerHTML += "</p>";
+    const lines = contenidoArchivo.split('\n');
+
+    // Obtener los nombres de las columnas
+    const headers = lines[0].trim().split(';');
+    const indexXTrain = headers.indexOf('XTrain');
+    const indexYTrain = headers.indexOf('YTrain');
+    const indexXToPredict = headers.indexOf('XToPredict');
+
+    // Crear listas para almacenar los valores
+    const xTrain = [];
+    const yTrain = [];
+    const predictArray = [];
+
+    // Iterar sobre cada fila (excepto la primera, que contiene los encabezados)
+    for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(';');
+        xTrain.push(parseFloat(row[indexXTrain]));
+        yTrain.push(parseFloat(row[indexYTrain]));
+        predictArray.push(parseFloat(row[indexXToPredict]));
+    }
+
+    console.log("XTrain:", xTrain);
+    console.log("YTrain:", yTrain);
+    console.log("Predict:", predictArray);
+
+    var polynomial = new PolynomialRegression();
+
+    polynomial.fit(xTrain, yTrain, 2);
+    yPredict = polynomial.predict(predictArray);
+    r2 = polynomial.getError();
+
+    polynomial.fit(xTrain, yTrain, 3);
+    yPredict2 = polynomial.predict(predictArray);
+    r22 = polynomial.getError();
+
+    polynomial.fit(xTrain, yTrain, 4);
+    yPredict3 = polynomial.predict(predictArray);
+    r23 = polynomial.getError();
+
+    for (let i = 0; i < predictArray.length; i++) {
+        yPredict[i] = Number(yPredict[i].toFixed(2));
+        yPredict2[i] = Number(yPredict2[i].toFixed(2));
+        yPredict3[i] = Number(yPredict3[i].toFixed(2));
+    }
+
+    document.getElementById("log").innerHTML += 'Y Prediction Degree 2: [' + yPredict + ']<br>';
+    document.getElementById("log").innerHTML += 'Y Prediction Degree 3: [' + yPredict2 + ']<br>';
+    document.getElementById("log").innerHTML += 'Y Prediction Degree 4: [' + yPredict3 + ']<br>';
+    document.getElementById("log").innerHTML += 'R^2 for Degree 2: ' + Number(r2.toFixed(2)) + '<br>';
+    document.getElementById("log").innerHTML += 'R^2 for Degree 3: ' + Number(r22.toFixed(2)) + '<br>';
+    document.getElementById("log").innerHTML += 'R^2 for Degree 4: ' + Number(r23.toFixed(2)) + '<br>';
+
+    a = joinArrays('x', xTrain, 'Training', yTrain, 'Prediction Degree 2', yPredict, 'Prediction Degree 3', yPredict2, 'Prediction Degree 4', yPredict3);
+
+    console.log('el valor de a es'+a);
+
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart2);
+
+    //drawChart2();
 }
 
 function generateOptions() {
@@ -98,3 +152,34 @@ function drawChart() {
     var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
     chart.draw(data, options);
 }    
+
+
+
+//-------------------------------------------               polinomial
+function joinArrays() {
+    a = []
+    if (arguments.length == 10) {
+        a.push([arguments[0], arguments[2], arguments[4], arguments[6], arguments[8]]);
+        for (var i = 0; i < arguments[1].length; i++) {
+            a.push([arguments[1][i], arguments[3][i], arguments[5][i], arguments[7][i], arguments[9][i]]);
+        }
+    }
+    return a;
+}
+
+function drawChart2() {
+    var data = google.visualization.arrayToDataTable(a);
+    var options = {
+        seriesType: 'scatter',
+        series: {
+            1: { type: 'line' },
+            2: { type: 'line' },
+            3: { type: 'line' }
+        }
+    };
+    var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+}
+
+
+//-------------------------------------------               polinomial
